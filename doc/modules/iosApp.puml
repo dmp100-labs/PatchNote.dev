@@ -1,0 +1,80 @@
+@startuml IosApp Module Structure
+
+title IosApp Module - iOS Native Application
+
+skinparam componentStyle rectangle
+skinparam package {
+    BackgroundColor #F8F8F8
+    BorderColor #999999
+}
+
+package "iosApp" {
+    
+    package "Swift App" #147EFB {
+        [iOSApp\n@main] as App
+        [ContentView\nSwiftUI] as ContentView
+        
+        note right of App
+            SwiftUI App 진입점
+        end note
+        
+        note right of ContentView
+            SwiftUI View
+            
+            shared 프레임워크의
+            Greeting 클래스 호출
+        end note
+        
+        App --> ContentView : displays
+    }
+    
+    package "Configuration" {
+        [Info.plist] as Plist
+        
+        note right of Plist
+            앱 메타데이터
+            권한 설정
+        end note
+    }
+    
+    package "Xcode Project" {
+        [project.pbxproj] as Project
+        
+        note right of Project
+            빌드 구성
+            프레임워크 링크
+        end note
+    }
+}
+
+package "Shared Framework" #7F52FF {
+    [Shared.framework\n(Kotlin/Native)] as Framework
+    
+    note right of Framework
+        Static Framework
+        
+        포함:
+        - Platform
+        - Greeting
+        - Constants
+        
+        타겟:
+        - iosArm64
+        - iosSimulatorArm64
+    end note
+}
+
+ContentView --> Framework : imports & uses
+
+note bottom of iosApp
+    **빌드 설정**
+    - Xcode 프로젝트
+    - Swift 5.x
+    - SwiftUI
+    
+    **프레임워크 링크**
+    shared 모듈을 Static Framework로 빌드
+    Kotlin/Native로 컴파일
+end note
+
+@enduml

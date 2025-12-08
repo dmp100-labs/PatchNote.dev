@@ -1,0 +1,91 @@
+@startuml Data Flow - Read Operation
+
+title 데이터 읽기 흐름 (Unidirectional Data Flow)
+
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+box "UI Layer" #E3F2FD
+    participant "Screen" as Screen
+    participant "ViewModel" as VM
+    participant "StateFlow<UiState>" as State
+end box
+
+box "Domain Layer" #FFF3E0
+    participant "GetReleaseNotesUseCase" as UseCase
+    participant "ReleaseNoteRepository\n(interface)" as Repo
+end box
+
+box "Data Layer" #E8F5E9
+    participant "RepositoryImpl" as RepoImpl
+    participant "RemoteDataSource" as Remote
+    participant "LocalDataSource" as Local
+    participant "Mapper" as Mapper
+end box
+
+box "External" #FFE0B2
+    participant "Server API" as API
+    database "Cache DB" as DB
+end box
+
+== 초기 로딩 ==
+
+Screen -> VM : loadReleaseNotes(projectId)
+activate VM
+
+VM -> UseCase : invoke(projectId)
+activate UseCase
+
+UseCase -> Repo : getReleaseNotes(projectId)
+activate RepoImpl
+
+' Check cache first
+RepoImpl -> Local : getCachedNotes(projectId)
+activate Local
+Local -> DB : SELECT * FROM notes
+DB --> Local : List<Entity>
+Local --> RepoImpl : List<Entity> (if exists)
+deactivate Local
+
+alt Cache exists and valid
+    RepoImpl -> Mapper : fromEntity(entities)
+    Mapper --> RepoImpl : List<ReleaseNote>
+    RepoImpl --> UseCase : Result.Success(notes)
+else Cache miss or expired
+    RepoImpl -> Remote : fetchReleaseNotes(projectId)
+    activate Remote
+    Remote -> API : GET /api/release-notes?projectId=xxx
+    API --> Remote : List<ReleaseNoteDto>
+    deactivate Remote
+    
+    RepoImpl -> Mapper : toDomain(dtos)
+    Mapper --> RepoImpl : List<ReleaseNote>
+    
+    ' Update cache
+    RepoImpl -> Local : saveNotes(notes)
+    activate Local
+    Local -> DB : INSERT/UPDATE
+    deactivate Local
+    
+    RepoImpl --> UseCase : Result.Success(notes)
+end
+
+deactivate RepoImpl
+
+UseCase --> VM : Result.Success(notes)
+deactivate UseCase
+
+VM -> State : emit(UiState.Success(notes))
+State --> Screen : collect { uiState -> }
+
+deactivate VM
+
+Screen -> Screen : Recomposition\n(UI 업데이트)
+
+note over Screen
+    UI는 StateFlow를 관찰하여
+    자동으로 리컴포지션됨
+end note
+
+@enduml

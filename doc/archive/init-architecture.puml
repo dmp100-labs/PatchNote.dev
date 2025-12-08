@@ -1,0 +1,119 @@
+@startuml PatchNote11 Architecture
+
+title PatchNote11 - Kotlin Multiplatform Architecture
+
+skinparam componentStyle rectangle
+skinparam package {
+    BackgroundColor #F8F8F8
+    BorderColor #999999
+}
+
+package "Root Project" {
+    
+    package "shared\n(KMP Library)" #7F52FF {
+        [commonMain\n공통 비즈니스 로직] as common
+        [androidMain] as android_impl
+        [iosMain] as ios_impl
+        [jvmMain] as jvm_impl
+        [jsMain] as js_impl
+        
+        common -down-> android_impl : expects/actuals
+        common -down-> ios_impl : expects/actuals
+        common -down-> jvm_impl : expects/actuals
+        common -down-> js_impl : expects/actuals
+    }
+    
+    package "composeApp\n(UI)" #4285F4 {
+        [App.kt\nCompose UI] as compose_ui
+        [androidMain] as compose_android
+        [jvmMain\nDesktop] as compose_jvm
+        
+        compose_ui -down-> compose_android
+        compose_ui -down-> compose_jvm
+    }
+    
+    package "server\n(Backend)" #6DB33F {
+        [ServerApplication\nSpring Boot] as server_app
+        [Controller] as controller
+        [Config\nSecurity] as config
+        
+        server_app -down-> controller
+        server_app -down-> config
+    }
+    
+    package "iosApp\n(Native)" #147EFB {
+        [Swift App\nXcode Project] as ios_app
+        [ContentView] as ios_ui
+        
+        ios_app -down-> ios_ui
+    }
+    
+    package "webApp\n(Frontend)" #61DAFB {
+        [index.tsx\nReact App] as web_app
+        [Components\nGreeting, JSLogo] as web_components
+        
+        web_app -down-> web_components
+    }
+}
+
+' 의존성 관계
+compose_ui --> common : uses
+server_app --> common : uses
+ios_app --> common : uses Framework
+web_app ..> js_impl : TypeScript bindings
+
+' 외부 시스템
+database "PostgreSQL" as db
+database "Redis" as redis
+cloud "Prometheus" as prometheus
+
+server_app --> db : JPA/Flyway
+server_app --> redis : Cache/Session
+server_app --> prometheus : Metrics
+
+note right of common
+  **Shared Module**
+  - Platform.kt
+  - Greeting.kt
+  - Constants.kt
+  
+  공통 모델 및 로직
+end note
+
+note right of server_app
+  **Server Stack**
+  - Spring Boot 3.x
+  - Spring Security (JWT)
+  - Spring Data JPA
+  - Kotlin Coroutines
+  
+  Java 17 / Kotlin
+end note
+
+note right of compose_ui
+  **Compose Multiplatform**
+  - Material3 Design
+  - ViewModel
+  - Lifecycle
+  
+  Target: Android, Desktop
+end note
+
+note right of web_app
+  **Web Frontend**
+  - React + TypeScript
+  - Vite
+  
+  TypeScript definitions
+  from shared module
+end note
+
+legend right
+  |<back:#7F52FF>   </back>| Kotlin Multiplatform |
+  |<back:#4285F4>   </back>| Compose Multiplatform |
+  |<back:#6DB33F>   </back>| Spring Boot |
+  |<back:#61DAFB>   </back>| React + TypeScript |
+  |<back:#147EFB>   </back>| iOS Native |
+endlegend
+
+@enduml
