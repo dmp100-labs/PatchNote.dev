@@ -1,0 +1,48 @@
+name: Feature_Request
+description: Request a new feature or suggestion
+labels: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Development Task
+        Please provide details about the task.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Describe what needs to be done
+      placeholder: "Example: Implement user authentication"
+    validations:
+      required: true
+
+  - type: textarea
+    id: todo
+    attributes:
+      label: Todo List
+      description: List of tasks to complete
+      placeholder: |
+        - [ ]
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Development Scope
+      description: Select the scope of this task
+      options:
+        - Android Platform
+        - iOS Platform
+        - Desktop (JVM)
+        - Web Platform
+        - Common/Shared Logic
+        - Server (Spring boots)
+        - Build & Deployment
+        - Documentation
+        - Testing
+        - Spike (new imple)
+    validations:
+      required: true
