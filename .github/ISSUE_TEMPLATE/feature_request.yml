@@ -23,7 +23,7 @@ body:
     attributes:
       label: Todo List
       description: List of tasks to complete
-      placeholder: |
+      value: |
         - [ ]
     validations:
       required: false
