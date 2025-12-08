@@ -18,7 +18,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import patchnote11.composeapp.generated.resources.Res
 import patchnote11.composeapp.generated.resources.compose_multiplatform
-// Test Coderabbit
+// Test Coderabbit22
 @Composable
 @Preview
 fun App() {
