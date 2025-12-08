@@ -1,0 +1,207 @@
+@startuml Shared Module Structure
+
+title Shared 모듈 구조 (Domain + Data Layer)
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+package "shared/src/commonMain" {
+    
+    package "domain (비즈니스 로직)" #FFF3E0 {
+        
+        package "model" {
+            class ReleaseNote {
+                + id: String
+                + title: String
+                + content: String
+                + version: String
+                + releaseDate: LocalDateTime
+                + projectId: String
+                + status: NoteStatus
+            }
+            
+            class Project {
+                + id: String
+                + name: String
+                + description: String
+                + createdAt: LocalDateTime
+            }
+            
+            enum NoteStatus {
+                DRAFT
+                PUBLISHED
+                ARCHIVED
+            }
+            
+            ReleaseNote --> NoteStatus
+            ReleaseNote --> Project : belongs to
+        }
+        
+        package "repository" {
+            interface ReleaseNoteRepository {
+                + suspend getReleaseNotes(projectId): Result<List>
+                + suspend getReleaseNoteById(id): Result<Note>
+                + suspend createReleaseNote(note): Result<Note>
+                + suspend updateReleaseNote(note): Result<Note>
+                + suspend deleteReleaseNote(id): Result<Unit>
+                + observeReleaseNotes(projectId): Flow<List>
+            }
+            
+            interface ProjectRepository {
+                + suspend getProjects(): Result<List>
+                + suspend createProject(project): Result<Project>
+            }
+        }
+        
+        package "usecase" {
+            class GetReleaseNotesUseCase {
+                - repository: ReleaseNoteRepository
+                + suspend invoke(projectId): Result<List>
+            }
+            
+            class CreateReleaseNoteUseCase {
+                - repository: ReleaseNoteRepository
+                + suspend invoke(note): Result<Note>
+            }
+            
+            class ObserveReleaseNotesUseCase {
+                - repository: ReleaseNoteRepository
+                + invoke(projectId): Flow<List>
+            }
+            
+            GetReleaseNotesUseCase --> ReleaseNoteRepository
+            CreateReleaseNoteUseCase --> ReleaseNoteRepository
+            ObserveReleaseNotesUseCase --> ReleaseNoteRepository
+        }
+    }
+    
+    package "data (데이터 처리)" #E8F5E9 {
+        
+        package "repository" {
+            class ReleaseNoteRepositoryImpl {
+                - remoteDataSource: RemoteDataSource
+                - localDataSource: LocalDataSource
+                - mapper: Mapper
+                --
+                + suspend getReleaseNotes(projectId): Result<List>
+                + suspend createReleaseNote(note): Result<Note>
+            }
+            
+            ReleaseNoteRepositoryImpl ..|> ReleaseNoteRepository
+        }
+        
+        package "source/remote" {
+            class ReleaseNoteRemoteDataSource {
+                - apiClient: ApiClient
+                + suspend fetchReleaseNotes(projectId): List<Dto>
+                + suspend createReleaseNote(dto): Dto
+            }
+            
+            class ApiClient {
+                {abstract} expect
+            }
+        }
+        
+        package "source/local" {
+            class ReleaseNoteLocalDataSource {
+                - database: Database
+                + suspend saveReleaseNotes(notes): Unit
+                + suspend getReleaseNotes(projectId): List<Entity>
+                + observeReleaseNotes(projectId): Flow<List>
+            }
+            
+            class Database {
+                {abstract} expect
+            }
+        }
+        
+        package "dto" {
+            class ReleaseNoteDto {
+                @Serializable
+                + id: String?
+                + title: String
+                + content: String
+                + version: String
+            }
+        }
+        
+        package "mapper" {
+            class ReleaseNoteMapper {
+                + toDomain(dto): ReleaseNote
+                + toDto(domain): ReleaseNoteDto
+                + toEntity(domain): Entity
+                + fromEntity(entity): ReleaseNote
+            }
+            
+            ReleaseNoteMapper --> ReleaseNoteDto
+            ReleaseNoteMapper --> ReleaseNote
+        }
+        
+        ReleaseNoteRepositoryImpl --> ReleaseNoteRemoteDataSource
+        ReleaseNoteRepositoryImpl --> ReleaseNoteLocalDataSource
+        ReleaseNoteRepositoryImpl --> ReleaseNoteMapper
+        ReleaseNoteRemoteDataSource --> ReleaseNoteDto
+    }
+    
+    package "util" {
+        class Result<T> {
+            <<sealed>>
+            + Success(data: T)
+            + Error(message: String)
+        }
+    }
+}
+
+package "플랫폼별 구현" {
+    package "androidMain" #3DDC84 {
+        class "AndroidApiClient" as AndroidApi {
+            actual class
+            (Ktor Android)
+        }
+        
+        class "AndroidDatabase" as AndroidDB {
+            actual class
+            (SQLDelight Android)
+        }
+    }
+    
+    package "iosMain" #147EFB {
+        class "IOSApiClient" as IosApi {
+            actual class
+            (Ktor iOS)
+        }
+        
+        class "IOSDatabase" as IosDB {
+            actual class
+            (SQLDelight iOS)
+        }
+    }
+    
+    ApiClient <.. AndroidApi : implements
+    ApiClient <.. IosApi : implements
+    Database <.. AndroidDB : implements
+    Database <.. IosDB : implements
+}
+
+note right of ReleaseNoteRepository
+    **Repository Interface**
+    Domain Layer에 정의
+    Data Layer에서 구현
+    
+    UI는 이 인터페이스만 의존
+end note
+
+note right of ReleaseNoteRepositoryImpl
+    **Repository 구현**
+    - Remote와 Local 조합
+    - 캐싱 전략
+    - DTO ↔ Domain 변환
+end note
+
+note bottom of ApiClient
+    **expect/actual 패턴**
+    플랫폼별 네트워크 구현
+    (Ktor HttpClient)
+end note
+
+@enduml

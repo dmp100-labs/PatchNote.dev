@@ -1,0 +1,107 @@
+@startuml Google Architecture Layers
+
+title Google 권장 아키텍처 - 3 Layer Architecture
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+package "UI Layer" #E3F2FD {
+    package "Composables" {
+        [ReleaseNoteListScreen] as Screen
+        [Components] as Comp
+    }
+    
+    package "State Holders" {
+        [ReleaseNoteListViewModel] as VM
+        [UiState:\nStateFlow] as State
+    }
+    
+    Screen --> VM : observes
+    VM --> State : emits
+    State --> Screen : collects
+}
+
+package "Domain Layer" #FFF3E0 {
+    package "Use Cases" {
+        [GetReleaseNotesUseCase] as UseCase1
+        [CreateReleaseNoteUseCase] as UseCase2
+    }
+    
+    package "Models" {
+        [ReleaseNote] as Model
+        [Project] as Model2
+    }
+    
+    package "Repository Interfaces" {
+        interface "ReleaseNoteRepository" as RepoInterface
+    }
+    
+    UseCase1 --> RepoInterface : calls
+    UseCase2 --> RepoInterface : calls
+}
+
+package "Data Layer" #E8F5E9 {
+    package "Repositories" {
+        [ReleaseNoteRepositoryImpl] as RepoImpl
+    }
+    
+    package "Data Sources" {
+        [RemoteDataSource\n(API)] as Remote
+        [LocalDataSource\n(Cache)] as Local
+    }
+    
+    package "DTOs & Mappers" {
+        [ReleaseNoteDto] as Dto
+        [ReleaseNoteMapper] as Mapper
+    }
+    
+    RepoImpl ..|> RepoInterface : implements
+    RepoImpl --> Remote : fetches
+    RepoImpl --> Local : caches
+    RepoImpl --> Mapper : uses
+    Mapper --> Dto : converts
+    Mapper --> Model : converts
+}
+
+' Dependency Flow
+VM --> UseCase1 : invokes
+VM --> UseCase2 : invokes
+
+' External Systems
+cloud "Server API" as Server #FFE0B2
+database "Local Database" as DB #CFD8DC
+
+Remote --> Server : HTTP
+Local --> DB : SQL
+
+note right of VM
+    **ViewModel 역할**
+    - UI 상태 관리
+    - UseCase 호출
+    - StateFlow로 UI 업데이트
+end note
+
+note right of UseCase1
+    **UseCase 역할**
+    - 단일 비즈니스 로직
+    - Repository 조합
+    - 재사용 가능
+end note
+
+note right of RepoImpl
+    **Repository 역할**
+    - 데이터 소스 추상화
+    - Remote + Local 조합
+    - 캐싱 전략
+end note
+
+legend right
+    |<back:#E3F2FD>   </back>| UI Layer |
+    |<back:#FFF3E0>   </back>| Domain Layer |
+    |<back:#E8F5E9>   </back>| Data Layer |
+    
+    **의존성 방향**
+    UI → Domain ← Data
+endlegend
+
+@enduml

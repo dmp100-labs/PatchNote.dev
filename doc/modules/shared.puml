@@ -1,0 +1,83 @@
+@startuml Shared Module Structure
+
+title Shared Module - Kotlin Multiplatform
+
+skinparam componentStyle rectangle
+skinparam package {
+    BackgroundColor #F8F8F8
+    BorderColor #999999
+}
+
+package "shared" {
+    
+    package "commonMain\n(공통 코드)" #7F52FF {
+        [Platform\ninterface] as Platform
+        [Greeting\nclass] as Greeting
+        [Constants\nobject] as Constants
+        
+        note right of Platform
+            expect/actual 패턴
+            각 플랫폼에서 구현
+        end note
+        
+        Greeting --> Platform
+    }
+    
+    package "androidMain" #3DDC84 {
+        [AndroidPlatform] as AndroidPlatform
+        
+        note right of AndroidPlatform
+            actual fun getPlatform()
+            = AndroidPlatform()
+        end note
+        
+        Platform <.. AndroidPlatform : implements
+    }
+    
+    package "iosMain" #147EFB {
+        [IOSPlatform] as IOSPlatform
+        
+        note right of IOSPlatform
+            actual fun getPlatform()
+            = IOSPlatform()
+        end note
+        
+        Platform <.. IOSPlatform : implements
+    }
+    
+    package "jvmMain" #F88909 {
+        [JVMPlatform] as JVMPlatform
+        
+        note right of JVMPlatform
+            actual fun getPlatform()
+            = JVMPlatform()
+            
+            서버 & 데스크톱용
+        end note
+        
+        Platform <.. JVMPlatform : implements
+    }
+    
+    package "jsMain" #F7DF1E {
+        [JSPlatform] as JSPlatform
+        
+        note right of JSPlatform
+            actual fun getPlatform()
+            = JSPlatform()
+            
+            @JsExport로 TS 노출
+        end note
+        
+        Platform <.. JSPlatform : implements
+    }
+}
+
+note bottom of shared
+    **빌드 설정**
+    - Kotlin Multiplatform Plugin
+    - Android Library Plugin
+    - 타겟: Android, iOS, JVM, JS
+    - JS: TypeScript definitions 생성
+end note
+
+@enduml

@@ -11,4 +11,4 @@
 Android · iOS · Desktop · Web · Server
 
 ## 문서 가이드
-- [project-structure](doc/init-project-structure.md)
+- [PROJECT-GUIDE](doc/PROJECT-GUIDE.md)

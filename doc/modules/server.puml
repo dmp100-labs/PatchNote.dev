@@ -1,0 +1,104 @@
+@startuml Server Module Structure
+
+title Server Module - Spring Boot Backend
+
+skinparam componentStyle rectangle
+skinparam package {
+    BackgroundColor #F8F8F8
+    BorderColor #999999
+}
+
+package "server" {
+    
+    [ServerApplication\n@SpringBootApplication] as App #6DB33F
+    
+    note right of App
+        **진입점**
+        Spring Boot 메인 클래스
+        포트: 8080 (기본값)
+    end note
+    
+    package "controller" #4CAF50 {
+        [HelloController\n@RestController] as Controller
+        
+        note right of Controller
+            **REST API**
+            - GET /api/hello
+            - GET /api/health
+        end note
+    }
+    
+    package "config" #FF9800 {
+        [SecurityConfig\n@Configuration] as Security
+        
+        note right of Security
+            **Spring Security**
+            - CSRF 비활성화
+            - 모든 API 허용
+            - H2 콘솔 허용
+        end note
+    }
+    
+    package "domain\n(예정)" #2196F3 {
+        [Entity Classes] as Entity
+    }
+    
+    package "repository\n(예정)" #2196F3 {
+        [JPA Repository] as Repository
+    }
+    
+    package "service\n(예정)" {
+        [Business Logic] as Service
+    }
+    
+    App --> Controller
+    App --> Security
+    Controller ..> Service : uses
+    Service ..> Repository : uses
+    Repository ..> Entity : manages
+}
+
+package "External Systems" {
+    database "PostgreSQL\n(Production)" as Postgres
+    database "H2\n(Test/Dev)" as H2
+    database "Redis\n(Cache)" as Redis
+    cloud "Prometheus\n(Metrics)" as Prometheus
+}
+
+App --> Postgres : JPA
+App --> H2 : Test
+App --> Redis : Cache
+App --> Prometheus : Actuator
+
+package "Dependencies" {
+    [Spring Boot Web] as Web
+    [Spring Data JPA] as JPA
+    [Spring Security] as SpringSecurity
+    [Flyway Migration] as Flyway
+    [Actuator] as Actuator
+    [shared module] as Shared
+}
+
+App --> Web
+App --> JPA
+App --> SpringSecurity
+App --> Flyway
+App --> Actuator
+App --> Shared
+
+note bottom of server
+    **빌드 설정**
+    - Kotlin JVM Plugin
+    - Spring Boot 3.x
+    - Java 17
+    
+    **주요 기능**
+    - REST API
+    - JWT 인증 (예정)
+    - JPA/Hibernate ORM
+    - Flyway 마이그레이션
+    - Actuator 모니터링
+    - Prometheus 메트릭
+end note
+
+@enduml

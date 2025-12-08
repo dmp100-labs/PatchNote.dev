@@ -1,0 +1,217 @@
+@startuml ComposeApp Module Structure
+
+title ComposeApp 모듈 구조 (UI Layer)
+
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+package "composeApp/src/commonMain" {
+    
+    package "feature/releasenote" #E3F2FD {
+        
+        package "list" {
+            class ReleaseNoteListScreen {
+                @Composable
+                + ReleaseNoteListScreen(
+                    viewModel: ViewModel,
+                    onNoteClick: (String) -> Unit
+                )
+            }
+            
+            class ReleaseNoteListViewModel {
+                - getReleaseNotesUseCase
+                - observeReleaseNotesUseCase
+                - deleteReleaseNoteUseCase
+                --
+                + uiState: StateFlow<UiState>
+                --
+                + loadReleaseNotes(projectId)
+                + deleteReleaseNote(id)
+                + refreshReleaseNotes()
+            }
+            
+            class ReleaseNoteListUiState {
+                <<sealed interface>>
+                + Loading
+                + Success(notes: List)
+                + Error(message: String)
+            }
+            
+            package "component" {
+                class ReleaseNoteListItem {
+                    @Composable
+                    + ReleaseNoteListItem(
+                        note: ReleaseNote,
+                        onClick: () -> Unit
+                    )
+                }
+                
+                class EmptyReleaseNoteList {
+                    @Composable
+                }
+            }
+            
+            ReleaseNoteListScreen --> ReleaseNoteListViewModel : observes
+            ReleaseNoteListViewModel --> ReleaseNoteListUiState : emits
+            ReleaseNoteListScreen --> ReleaseNoteListItem : displays
+            ReleaseNoteListScreen --> EmptyReleaseNoteList : displays
+        }
+        
+        package "detail" {
+            class ReleaseNoteDetailScreen {
+                @Composable
+            }
+            
+            class ReleaseNoteDetailViewModel {
+                + uiState: StateFlow<DetailUiState>
+                + loadReleaseNote(id)
+            }
+            
+            ReleaseNoteDetailScreen --> ReleaseNoteDetailViewModel
+        }
+        
+        package "create" {
+            class CreateReleaseNoteScreen {
+                @Composable
+            }
+            
+            class CreateReleaseNoteViewModel {
+                + uiState: StateFlow<CreateUiState>
+                + createReleaseNote(note)
+            }
+            
+            CreateReleaseNoteScreen --> CreateReleaseNoteViewModel
+        }
+    }
+    
+    package "ui/component (공통 컴포넌트)" #BBDEFB {
+        class PrimaryButton {
+            @Composable
+            + PrimaryButton(
+                text: String,
+                onClick: () -> Unit,
+                modifier: Modifier
+            )
+        }
+        
+        class CustomTextField {
+            @Composable
+            + CustomTextField(
+                value: String,
+                onValueChange: (String) -> Unit,
+                label: String
+            )
+        }
+        
+        class LoadingIndicator {
+            @Composable
+        }
+        
+        class ConfirmDialog {
+            @Composable
+        }
+    }
+    
+    package "ui/theme" #BBDEFB {
+        class Theme {
+            @Composable
+            + PatchNoteTheme(content)
+        }
+        
+        class Color {
+            + Primary: Color
+            + Secondary: Color
+            + Background: Color
+        }
+        
+        class Typography {
+            + headlineLarge: TextStyle
+            + bodyMedium: TextStyle
+        }
+        
+        Theme --> Color
+        Theme --> Typography
+    }
+    
+    package "ui/navigation" #90CAF9 {
+        class AppNavigation {
+            @Composable
+            + AppNavigation(navController)
+        }
+        
+        class NavRoute {
+            <<sealed class>>
+            + ReleaseNoteList
+            + ReleaseNoteDetail(id: String)
+            + CreateReleaseNote
+            + ProjectList
+        }
+        
+        AppNavigation --> NavRoute
+    }
+    
+    ReleaseNoteListScreen --> PrimaryButton : uses
+    ReleaseNoteListScreen --> LoadingIndicator : uses
+    CreateReleaseNoteScreen --> CustomTextField : uses
+    CreateReleaseNoteScreen --> ConfirmDialog : uses
+}
+
+package "shared 모듈 (의존성)" #FFF3E0 {
+    class GetReleaseNotesUseCase {
+        + suspend invoke(projectId): Result<List>
+    }
+    
+    class CreateReleaseNoteUseCase {
+        + suspend invoke(note): Result<Note>
+    }
+    
+    class ReleaseNote {
+        + id: String
+        + title: String
+        + content: String
+    }
+}
+
+ReleaseNoteListViewModel --> GetReleaseNotesUseCase : invokes
+CreateReleaseNoteViewModel --> CreateReleaseNoteUseCase : invokes
+ReleaseNoteListScreen --> ReleaseNote : displays
+
+package "DI (Koin)" #C8E6C9 {
+    class ViewModelModule {
+        + viewModelModule
+    }
+    
+    class AppModule {
+        + appModule
+    }
+}
+
+note right of ReleaseNoteListViewModel
+    **ViewModel 역할**
+    1. UI 상태 관리 (StateFlow)
+    2. UseCase 호출
+    3. 비즈니스 로직 트리거
+    
+    **State 관리**
+    - private _uiState: MutableStateFlow
+    - public uiState: StateFlow (읽기 전용)
+end note
+
+note right of ReleaseNoteListScreen
+    **Composable 역할**
+    1. UI 렌더링
+    2. StateFlow 관찰 (collectAsState)
+    3. 사용자 이벤트 → ViewModel 전달
+    
+    **Recomposition**
+    uiState 변경 시 자동 리컴포지션
+end note
+
+note bottom of AppNavigation
+    **Navigation 구조**
+    - NavHost로 화면 관리
+    - NavRoute로 경로 정의
+    - Type-safe navigation
+end note
+
+@enduml

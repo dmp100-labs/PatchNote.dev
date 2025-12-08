@@ -1,0 +1,102 @@
+@startuml Data Flow - Write Operation
+
+title 데이터 쓰기 흐름 (Create Release Note)
+
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+box "UI Layer" #E3F2FD
+    participant "CreateScreen" as Screen
+    participant "CreateViewModel" as VM
+    participant "StateFlow<UiState>" as State
+end box
+
+box "Domain Layer" #FFF3E0
+    participant "CreateReleaseNoteUseCase" as UseCase
+    participant "ReleaseNoteRepository\n(interface)" as Repo
+end box
+
+box "Data Layer" #E8F5E9
+    participant "RepositoryImpl" as RepoImpl
+    participant "RemoteDataSource" as Remote
+    participant "LocalDataSource" as Local
+    participant "Mapper" as Mapper
+end box
+
+box "External" #FFE0B2
+    participant "Server API" as API
+    database "Cache DB" as DB
+end box
+
+== 생성 프로세스 ==
+
+Screen -> Screen : User fills form\nand clicks "Create"
+
+Screen -> VM : createReleaseNote(note)
+activate VM
+
+VM -> State : emit(UiState.Loading)
+State --> Screen : show loading indicator
+
+VM -> UseCase : invoke(note)
+activate UseCase
+
+UseCase -> Repo : createReleaseNote(note)
+activate RepoImpl
+
+' Convert to DTO
+RepoImpl -> Mapper : toDto(note)
+Mapper --> RepoImpl : ReleaseNoteDto
+
+' Send to server
+RepoImpl -> Remote : createReleaseNote(dto)
+activate Remote
+Remote -> API : POST /api/release-notes\n{body: dto}
+API --> Remote : ReleaseNoteDto (with id)
+deactivate Remote
+
+alt Success
+    ' Convert response
+    RepoImpl -> Mapper : toDomain(responseDto)
+    Mapper --> RepoImpl : ReleaseNote (with id)
+    
+    ' Update local cache
+    RepoImpl -> Local : saveNote(note)
+    activate Local
+    Local -> DB : INSERT INTO notes
+    deactivate Local
+    
+    RepoImpl --> UseCase : Result.Success(note)
+    UseCase --> VM : Result.Success(note)
+    
+    VM -> State : emit(UiState.Success(note))
+    State --> Screen : navigate to detail or list
+    
+else Network Error
+    RepoImpl --> UseCase : Result.Error("Network error")
+    UseCase --> VM : Result.Error(message)
+    
+    VM -> State : emit(UiState.Error(message))
+    State --> Screen : show error dialog
+end
+
+deactivate RepoImpl
+deactivate UseCase
+deactivate VM
+
+note over Screen
+    성공 시: 다른 화면으로 이동
+    실패 시: 에러 메시지 표시
+end note
+
+== Optimistic Update (선택적) ==
+
+note over RepoImpl
+    즉시 로컬 캐시에 저장하고
+    UI 업데이트 후 서버 동기화
+    
+    네트워크 실패 시 롤백
+end note
+
+@enduml
