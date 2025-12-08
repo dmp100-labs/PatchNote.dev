@@ -19,6 +19,11 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import patchnote11.composeapp.generated.resources.Res
 import patchnote11.composeapp.generated.resources.compose_multiplatform
 // Test Coderabbit22
+/**
+ * Previewable root composable that shows a button which toggles the visibility of additional content.
+ *
+ * When visible, the content displays a platform image and a greeting string obtained from `Greeting().greet()`.
+ */
 @Composable
 @Preview
 fun App() {
