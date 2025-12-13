@@ -11,4 +11,4 @@
 Android · iOS · Desktop · Web · Server
 
 ## 문서 가이드
-- [PROJECT-GUIDE](doc/PROJECT-GUIDE.md)
+- [PROJECT-GUIDE](https://www.notion.so/PatchNote-2c5d39becd348082b7d4f7db97e6dafe?source=copy_link)
