@@ -74,7 +74,6 @@ yarn-error.log*
 dist/
 .cache/
 .parcel-cache/
-package-lock.json
 yarn.lock
 .pnp.*
 .yarn/
