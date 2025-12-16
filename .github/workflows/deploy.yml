@@ -23,8 +23,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: webApp/package-lock.json
 
       - name: Make gradlew executable
         run: chmod +x gradlew
