@@ -30,7 +30,7 @@ jobs:
       - name: Build Shared module
         run: |
           echo "🔨 Building Kotlin Shared module..."
-          ./gradlew :shared:build --no-daemon
+          ./gradlew :shared:check --no-daemon
           echo "✅ Shared build complete!"
 
       - name: Build WebApp
