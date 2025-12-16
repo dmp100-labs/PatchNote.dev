@@ -28,7 +28,7 @@ export function Greeting() {
   return (
     <div className="greeting-container">
       <button onClick={handleClick} className="greeting-button">
-        Click me!
+        터치하세요
       </button>
 
       {isVisible && (

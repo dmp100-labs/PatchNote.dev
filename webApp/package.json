@@ -4,10 +4,10 @@
   "description": "Web application that uses Kotlin Multiplatform Library",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
+    "build:shared": "cd .. && ./gradlew :shared:build",
+    "dev": "npm run build:shared && vite",
+    "build": "npm run build:shared && vite build"
+},
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
