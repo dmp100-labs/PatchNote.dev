@@ -41,7 +41,7 @@ jobs:
           echo "📦 Installing dependencies..."
           npm ci
           echo "🔨 Building React app..."
-          npm run build
+          npx vite build
           echo "✅ WebApp build complete!"
 
       - name: Deploy to Netlify
@@ -54,7 +54,6 @@ jobs:
           deploy-message: "🚀 Deploy from ${{ github.sha }}"
           enable-commit-comment: true
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         timeout-minutes: 5
-
