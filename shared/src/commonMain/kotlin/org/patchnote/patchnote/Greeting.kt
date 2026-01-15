@@ -3,7 +3,7 @@ package org.patchnote.patchnote
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
-// TODO : Create base package structure: data, domain, presentation
+// TODO : Create base package structure: data, (domain), each presentation
 
 @OptIn(ExperimentalJsExport::class)
 @JsExport
