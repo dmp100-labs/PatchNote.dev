@@ -2,6 +2,7 @@ package org.patchnote.patchnote
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import org.patchnote.patchnote.presentation.screen.App
 
 fun main() = application {
     // Todo  : DI(Koin) 초기화 (브릿지없음)

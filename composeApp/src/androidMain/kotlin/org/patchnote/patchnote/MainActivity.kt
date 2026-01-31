@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import org.patchnote.patchnote.presentation.screen.App
 
 
 // Todo : AndroidManifest.xml의 <application> 태그에 android:name=".MyApplication"을 꼭 추가
