@@ -28,9 +28,8 @@ export function Greeting() {
   return (
     <div className="greeting-container">
       <button onClick={handleClick} className="greeting-button">
-        터치하세요
+        공차민승제주완민성 화이팅
       </button>
-
       {isVisible && (
         <div className={isAnimating ? 'greeting-content fade-out' : 'greeting-content'} onAnimationEnd={handleAnimationEnd}>
           <JSLogo />
