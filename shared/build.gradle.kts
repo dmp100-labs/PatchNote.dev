@@ -36,7 +36,10 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
-            // put your Multiplatform dependencies here
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        jvmMain {
+            //  put Desktop(composeApp) dependencies here
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
