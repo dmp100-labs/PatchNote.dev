@@ -5,9 +5,7 @@ import androidx.compose.ui.window.application
 import org.patchnote.patchnote.presentation.screen.App
 
 fun main() = application {
-    // Todo  : DI(Koin) 초기화 (브릿지없음)
-    // 🚀 데스크톱 앱 시작 시 Koin 가동
-    // initKoin()
+    // TODO: [Koin] 초기화
     Window(
         onCloseRequest = ::exitApplication,
         title = "PatchNote11",
@@ -15,9 +13,3 @@ fun main() = application {
         App()
     }
 }
-
-//fun initKoin() {
-//    startKoin {
-//        modules(sharedModule)
-//        // modules(sharedModule, jvmModule)
-//    }
