@@ -7,10 +7,11 @@
     "build:shared": "cd .. && ./gradlew :shared:build",
     "dev": "npm run build:shared && vite",
     "build": "npm run build:shared && vite build"
-},
+  },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^7.13.0",
     "shared": "file:../shared/build/dist/js/productionLibrary"
   },
   "devDependencies": {
