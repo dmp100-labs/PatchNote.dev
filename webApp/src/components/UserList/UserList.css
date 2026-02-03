@@ -1,0 +1,54 @@
+.user-list-container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.load-button {
+  background-color: #6200ee;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.load-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.content-area {
+  margin-top: 20px;
+}
+
+.user-card {
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+  padding: 12px;
+  text-align: left;
+}
+
+.user-name {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.user-email {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.error-msg {
+  color: red;
+  background: #ffe6e6;
+  padding: 10px;
+  border-radius: 4px;
+}
