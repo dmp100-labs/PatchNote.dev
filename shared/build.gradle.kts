@@ -38,6 +38,9 @@ kotlin {
         commonMain.dependencies {
             // put your Multiplatform dependencies here
         }
+        jvmMain {
+            //  put Desktop(composeApp) dependencies here
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
