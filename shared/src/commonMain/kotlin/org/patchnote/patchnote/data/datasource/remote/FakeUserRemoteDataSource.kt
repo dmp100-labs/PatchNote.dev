@@ -5,12 +5,7 @@ import org.patchnote.patchnote.data.dto.UserDto
 class FakeUserRemoteDataSource : UserRemoteDataSource {
 
     private val fakeUsers = listOf(
-        UserDto("1", "공승준", "hong@example.com"),
-        UserDto("2", "공승준", "kim@example.com"),
-        UserDto("3", "공승준", "lee@example.com"),
-        UserDto("4", "공승준", "lee@example.com"),
-        UserDto("5", "공승준", "lee@example.com")
-
+        UserDto("1", "Test", "Test@Test.com"),
     )
 
     override suspend fun getUsers(): List<UserDto> {
